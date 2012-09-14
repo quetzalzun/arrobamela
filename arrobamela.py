@@ -54,11 +54,10 @@ def write_csv(twitter_users, csvfile):
                 csvWriter.writerow(["@" + str(item.screen_name), item.statuses_count, item.followers_count, item.friends_count, created])
 
 def discard_older(twitter_users, newer):
-	return_this = []
 	for item in twitter_users:
-		if item.status.created_at >= newer:
-			return_this.append(item)
-	return return_this
+		if item.status.created_at < newer:
+			twitter_users.remove(item)
+	return twitter_users
 
 def get_twitter_users(search_term):
 	twitter = connect_twitter()
