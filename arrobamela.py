@@ -44,14 +44,13 @@ def discard_older(twitter_users, newer):
 def get_twitter_users(search_term):
 	twitter = connect_twitter()
 	twitter_users = []
-	page = 1
-	while True:
-		tmp = twitter.search_users(search_term, 20, page)
-		page += 1
-		if not tmp:
-			break
-		twitter_users = twitter_users + tmp
-	return twitter_users		
+	try:
+		for page in tweepy.Cursor(twitter.search_users,q=search_term).pages():
+			twitter_users += page
+	except Error:
+		print("No quedan llamadas disponibles, inténtelo más tarde")
+		exit()
+	return twitter_users
 
 def main():
 	try:
@@ -61,7 +60,7 @@ def main():
 		sys.exit(2)
 
 	if len(args) == 0:
-		print "Escribe el término de búsqueda"
+		print("Escribe el término de búsqueda")
 		exit(2)
 	search_term = args[0]
 
