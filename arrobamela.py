@@ -13,11 +13,11 @@ def string_to_datetime(string):
 	return datetime.fromtimestamp(time.mktime(struct))
 
 def connect_twitter():
-	consumer_key="ht93deD0AXveW5katzsJWg"
-	consumer_secret="4sKebzJHp9qjCXdRbtKFgDjxTsK1w28DYO8LXHI5g"
+	consumer_key="aRY4OZ39lakuwpBR8mXAIQ"
+	consumer_secret="TsbCj8RrwOsI9A49Nk0lBIE4rLWOiM9IND9u5xSU"
 	
-	access_token="get your own tokens hippie"
-	access_token_secret=""
+	access_token="22443184-JqQh6QXJX2mMuKgQGO16VaPYgvlYL6AWZeeIbZCk"
+	access_token_secret="Q6IMfzFIXngPEEJcsTIXmW3qAG8c0Z8qE86Mh8EGI"
 	
 	auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 	auth.set_access_token(access_token, access_token_secret)
@@ -29,7 +29,10 @@ def write_csv(twitter_users, csvfile):
         csvWriter.writerow(["nombre de usuario", "tweets", "seguidores", "siguiendo", "último tweet"])
 
         for item in twitter_users:
-                csvWriter.writerow([item.screen_name, item.statuses_count, item.followers_count, item.friends_count, item.status.created_at])
+		created = 0
+		if hasattr(item, 'status'):
+			created = item.status.created_at
+                csvWriter.writerow(["@" + str(item.screen_name), item.statuses_count, item.followers_count, item.friends_count, created])
 
 def discard_older(twitter_users, newer):
 	return_this = []
@@ -37,6 +40,18 @@ def discard_older(twitter_users, newer):
 		if item.status.created_at >= newer:
 			return_this.append(item)
 	return return_this
+
+def get_twitter_users(search_term):
+	twitter = connect_twitter()
+	twitter_users = []
+	page = 1
+	while True:
+		tmp = twitter.search_users(search_term, 20, page)
+		page += 1
+		if not tmp:
+			break
+		twitter_users = twitter_users + tmp
+	return twitter_users		
 
 def main():
 	try:
@@ -58,8 +73,7 @@ def main():
 		if o in ("-n", "--newer"):
 			newer = string_to_datetime(a)
 
-	twitter = connect_twitter()
-	twitter_users = twitter.search_users(search_term)
+	twitter_users = get_twitter_users(search_term)
 
 	if newer != 0:
 		twitter_users = discard_older(twitter_users, newer)
@@ -68,3 +82,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
